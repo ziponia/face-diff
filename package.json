@@ -8,11 +8,15 @@
     "type-check": "tsc"
   },
   "dependencies": {
+    "aws-sdk": "^2.751.0",
+    "axios": "^0.20.0",
+    "formidable": "^1.2.2",
     "next": "latest",
     "react": "^16.12.0",
     "react-dom": "^16.12.0"
   },
   "devDependencies": {
+    "@types/formidable": "^1.0.31",
     "@types/node": "^12.12.21",
     "@types/react": "^16.9.16",
     "@types/react-dom": "^16.9.4",
