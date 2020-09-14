@@ -3,6 +3,7 @@ import {NextPage} from "next";
 import axios from "axios";
 import {Col, Container, Row} from "react-bootstrap";
 import ImageLoader from "../ImageLoader";
+import DropZone from "../components/DropZone";
 
 type Props = {};
 
@@ -47,6 +48,7 @@ const IndexPage: NextPage<Props> = (props) => {
     }>({source: undefined, target: undefined});
 
     const [result, setResult] = useState<FaceDiffResponse>();
+    const [dragging, setDragging] = useState(false);
 
     const handleFileSubmitAsync = async () => {
         const f = new FormData();
@@ -72,41 +74,43 @@ const IndexPage: NextPage<Props> = (props) => {
     };
 
     return (
-        <Container style={{paddingTop: 100}}>
-            <Row>
-                <Col>
-                    <h1 className="title">페이스 DIFF.</h1>
-                </Col>
-            </Row>
+        <DropZone onDragging={setDragging} onDrop={e => console.log(e)}>
+            <Container style={{paddingTop: 100}}>
+                <Row>
+                    <Col>
+                        <h1 className="title">페이스 DIFF.</h1>
+                    </Col>
+                </Row>
 
-            <Row>
-                <Col>
-                    {<ImageLoader file={compareFiles.source}/>}
-                </Col>
-                <Col>
-                    {<ImageLoader file={compareFiles.target}/>}
-                </Col>
-            </Row>
+                <Row>
+                    <Col>
+                        {<ImageLoader file={compareFiles.source} mask={dragging}/>}
+                    </Col>
+                    <Col>
+                        {<ImageLoader file={compareFiles.target} mask={dragging}/>}
+                    </Col>
+                </Row>
 
-            <input type="file" name="source" onChange={handleInputFiles}/>
-            <input type="file" name="target" onChange={handleInputFiles}/>
+                <input type="file" name="source" onChange={handleInputFiles}/>
+                <input type="file" name="target" onChange={handleInputFiles}/>
 
-            <button onClick={handleFileSubmitAsync}>업로드</button>
+                <button onClick={handleFileSubmitAsync}>업로드</button>
 
-            {!!result && (
-                <fieldset>
-                    <legend>결과</legend>
-                    <div>
-                        {!!result && result.content.length > 0 ? (
-                            <p>{result.content[0].Similarity}% 확률로 일치합니다!</p>
-                        ) : (
-                            <p> 흠... 전혀 다른 사진인 것 같네요...!</p>
-                        )}
-                    </div>
-                </fieldset>
-            )}
+                {!!result && (
+                    <fieldset>
+                        <legend>결과</legend>
+                        <div>
+                            {!!result && result.content.length > 0 ? (
+                                <p>{result.content[0].Similarity}% 확률로 일치합니다!</p>
+                            ) : (
+                                <p> 흠... 전혀 다른 사진인 것 같네요...!</p>
+                            )}
+                        </div>
+                    </fieldset>
+                )}
 
-        </Container>
+            </Container>
+        </DropZone>
     );
 };
 

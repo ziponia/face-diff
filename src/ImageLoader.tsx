@@ -1,63 +1,53 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Col, Image} from "react-bootstrap";
+import axios from 'axios';
 
 type Props = {
     file?: File;
+    mask?: boolean;
 };
 
 const ImageLoader: React.FC<Props> = (props) => {
 
-    const [loadImage, setLoadImage] = useState();
-
-    const onDragEnter = (e: DragEvent) => {
-        e.stopPropagation();
-        console.log('dragstart')
-    }
-
-    const onDrag = (e: DragEvent) => {
-        e.stopPropagation();
-        console.log('onDrag')
-    }
-
-    const onDrop = (e: DragEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-        console.log('onDrop')
-    }
-
-    const onDragOver = (e: DragEvent) => {
-        e.stopPropagation();
-        e.preventDefault();
-        console.log('onDragOver')
-    }
+    const [loadImage, setLoadImage] = useState<string>();
 
     useEffect(() => {
-        window.addEventListener('dragenter', onDragEnter);
-        window.addEventListener('dragover', onDragOver);
-        window.addEventListener('drag', onDrag);
-        window.addEventListener('drop', onDrop);
+        console.log(loadImage);
+    }, [loadImage])
 
-        return () => {
-            window.removeEventListener('dragenter', onDragEnter);
-            window.removeEventListener('dragover', onDragOver);
-            window.removeEventListener('drag', onDrag);
-            window.removeEventListener('drop', onDrop);
-        }
-    }, [])
+    const onDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        const {files} = e.dataTransfer;
+        if (files.length !== 1) return;
+        const file = files[0];
 
-    if (!loadImage) {
-        return (
-            <Col>
-                <p>이곳에 파일을 놓으셍요.</p>
-            </Col>
-        )
+        await generateThumbnail(file);
+    }
+
+    const generateThumbnail = async (file: File) => {
+        const f = new FormData();
+        f.set('file', file);
+        const {data} = await axios.post('/api/thumbnail-generate', f, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+
+        setLoadImage(data);
     }
 
     return (
-        <div>
-            <Image src="holder.js/171x180" />
-        </div>
-    );
+        <Col className="image-wrap">
+            <div className={`mask-container ${props.mask && 'mask'}`} onDrop={onDrop}>
+                이곳에 비교 할 파일을 놓으세요
+                {loadImage && <Image src={loadImage}/>}
+            </div>
+        </Col>
+    )
 };
+
+ImageLoader.defaultProps = {
+    mask: false
+}
 
 export default ImageLoader;
